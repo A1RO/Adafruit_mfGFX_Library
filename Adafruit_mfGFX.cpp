@@ -32,11 +32,7 @@ POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "Adafruit_mfGFX.h"
-#include "fonts.h"
-
-
-#define pgm_read_byte(addr) (*(const uint8_t *)(addr))
-
+#include <avr/pgmspace.h>
 
 Adafruit_GFX::Adafruit_GFX(int16_t w, int16_t h):
   WIDTH(w), HEIGHT(h)
