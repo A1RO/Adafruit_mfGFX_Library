@@ -3,21 +3,17 @@ This is the core graphics library for all our displays, providing a common
 set of graphics primitives (points, lines, circles, etc.).  It needs to be
 paired with a hardware-specific library for each display device we carry
 (to handle the lower-level functions).
-
 Adafruit invests time and resources providing this open source code, please
 support Adafruit & open-source hardware by purchasing products from Adafruit!
- 
-Copyright (c) 2013 Adafruit Industries.  All rights reserved.
 
+Copyright (c) 2013 Adafruit Industries.  All rights reserved.
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
-
 - Redistributions of source code must retain the above copyright notice,
   this list of conditions and the following disclaimer.
 - Redistributions in binary form must reproduce the above copyright notice,
   this list of conditions and the following disclaimer in the documentation
   and/or other materials provided with the distribution.
-
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -41,51 +37,30 @@ Adafruit_GFX::Adafruit_GFX(int16_t w, int16_t h):
   _width    = WIDTH;
   _height   = HEIGHT;
   rotation  = 0;
-  cursor_y  = cursor_x    = 0;
+  cursor_y  = cursor_x = 0;
   textsize  = 1;
-  textcolor = textbgcolor = 0xFFFF;
-  wrap      = true;
-  // Default to GLCDFONT to be compatible with existing code
-  setFont(GLCDFONT);		// May also be set to TIMESNR_8, CENTURY_8, COMICS_8 or TEST (for testing candidate fonts)
+  textcolor = textbgcolor = 0x0000;
+  wrap      = false;
+  setFont(monospac821BT_64pt);
  }
 
 void Adafruit_GFX::setFont(uint8_t f) {
   font = f;
   switch(font) {
-    case TIMESNR_8:
-      fontData = timesNewRoman_8ptBitmaps;
-	  fontDesc = timesNewRoman_8ptDescriptors;
+    case monospac821BT_64pt:
+      fontData = monospac821BT_64ptBitmaps;
+	    fontDesc = monospac821BT_64ptDescriptors;
       fontKern = 1;
       break;
-    case CENTURY_8:
-      fontData = centuryGothic_8ptBitmaps;
-	  fontDesc = centuryGothic_8ptDescriptors;
+      case liberationMono_48pt:
+      fontData = liberationMono_48ptBitmaps;
+      fontDesc = liberationMono_48ptDescriptors;
       fontKern = 1;
       break;
-    case ARIAL_8:
-      fontData = arial_8ptBitmaps;
-	  fontDesc = arial_8ptDescriptors;
-      fontKern = 1;
-      break;
-    case COMICS_8:
-      fontData = comicSansMS_8ptBitmaps;
-	  fontDesc = comicSansMS_8ptDescriptors;
-      fontKern = 1;
-      break;
-    case GLCDFONT:
-      fontData = glcdfontBitmaps;
-	  fontDesc = glcdfontDescriptors;
-      fontKern = 1;
-      break;
-    case TEST:
-      fontData = testBitmaps;
-	  fontDesc = testDescriptors;
-      fontKern = 1;
-      break;
-	default:
-      font = ARIAL_8;
-      fontData = arial_8ptBitmaps;
-	  fontDesc = arial_8ptDescriptors;
+	  default:
+      font = monospac821BT_64pt;
+      fontData = monospac821BT_64ptBitmaps;
+	    fontDesc = monospac821BT_64ptDescriptors;
       fontKern = 1;
       break;
   }
@@ -117,7 +92,7 @@ void Adafruit_GFX::drawCircle(int16_t x0, int16_t y0, int16_t r,
     x++;
     ddF_x += 2;
     f += ddF_x;
-  
+
     drawPixel(x0 + x, y0 + y, color);
     drawPixel(x0 - x, y0 + y, color);
     drawPixel(x0 + x, y0 - y, color);
@@ -149,7 +124,7 @@ void Adafruit_GFX::drawCircleHelper( int16_t x0, int16_t y0,
     if (cornername & 0x4) {
       drawPixel(x0 + x, y0 + y, color);
       drawPixel(x0 + y, y0 + x, color);
-    } 
+    }
     if (cornername & 0x2) {
       drawPixel(x0 + x, y0 - y, color);
       drawPixel(x0 + y, y0 - x, color);
@@ -407,7 +382,7 @@ void Adafruit_GFX::drawBitmap(int16_t x, int16_t y,
 }
 
 size_t Adafruit_GFX::write(uint8_t c) {
-  
+
   if (c == '\n') {
     cursor_y += textsize*fontDesc[0].height;	//all chars are same height so use height of space char
     cursor_x  = 0;
@@ -445,7 +420,7 @@ void Adafruit_GFX::drawChar(int16_t x, int16_t y, unsigned char c,
   else {
     c -= fontStart;
   }
- 
+
   if((x >= _width)            || // Clip right
      (y >= _height)           || // Clip bottom
      ((x + (fontDesc[c].width * size) - 1) < 0) || // Clip left
@@ -454,7 +429,7 @@ void Adafruit_GFX::drawChar(int16_t x, int16_t y, unsigned char c,
 
 	uint8_t bitCount=0;
   	uint16_t fontIndex = fontDesc[c].offset + 2; //((fontDesc + c)->offset) + 2;
-  
+
   for (int8_t i=0; i<fontDesc[c].height; i++ ) {	// i<fontHeight
     uint8_t line;
     for (int8_t j = 0; j<fontDesc[c].width; j++) {			//j<fontWidth
@@ -467,7 +442,7 @@ void Adafruit_GFX::drawChar(int16_t x, int16_t y, unsigned char c,
           }
         else {  // big size
           fillRect(x+(j*size), y+(i*size), size, size, color);
-        } 
+        }
       } else if (bg != color) {
         if (size == 1) // default size
           drawPixel(x+j, y+i, bg);
@@ -491,14 +466,14 @@ void Adafruit_GFX::setTextSize(uint8_t s) {
 }
 
 void Adafruit_GFX::setTextColor(uint16_t c) {
-  // For 'transparent' background, we'll set the bg 
+  // For 'transparent' background, we'll set the bg
   // to the same as fg instead of using a flag
   textcolor = textbgcolor = c;
 }
 
 void Adafruit_GFX::setTextColor(uint16_t c, uint16_t b) {
   textcolor   = c;
-  textbgcolor = b; 
+  textbgcolor = b;
 }
 
 void Adafruit_GFX::setTextWrap(boolean w) {
@@ -529,7 +504,7 @@ void Adafruit_GFX::setRotation(uint8_t x) {
 int16_t Adafruit_GFX::width(void) {
   return _width;
 }
- 
+
 int16_t Adafruit_GFX::height(void) {
   return _height;
 }
